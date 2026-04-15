@@ -3,6 +3,8 @@ nixPkgs = ["php83", "php83Packages.composer", "php83Extensions.pdo_mysql", "php8
 
 [phases.install]
 cmds = [
+    "mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache",
+    "chmod -R 775 storage bootstrap/cache",
     "composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts",
     "npm ci",
     "npm run build"
@@ -11,10 +13,7 @@ cmds = [
 [phases.build]
 dependsOn = ["install"]
 cmds = [
-    "php artisan package:discover --ansi || true",
-    "php artisan config:clear",
-    "php artisan route:clear",
-    "php artisan view:clear"
+    "php artisan package:discover --ansi || true"
 ]
 
 [start]
