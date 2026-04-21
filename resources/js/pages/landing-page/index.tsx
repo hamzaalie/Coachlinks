@@ -1,5 +1,5 @@
 import React from 'react';
-import { usePage } from '@inertiajs/react';
+import { usePage, Head } from '@inertiajs/react';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import FeaturesSection from './components/FeaturesSection';
@@ -289,21 +289,68 @@ export default function LandingPage() {
   };
 
   return (
-    <div 
-      className="min-h-screen bg-[#000000]" 
-      data-landing-page="true"
-      style={{ 
-        scrollBehavior: 'smooth', 
-        '--brand-color': primaryColor,
-        '--primary-color': settings.config_sections?.theme?.primary_color || primaryColor,
-        '--secondary-color': settings.config_sections?.theme?.secondary_color || '#8b5cf6',
-        '--accent-color': settings.config_sections?.theme?.accent_color || '#10b981'
-      } as React.CSSProperties}
-    >
-      {sectionOrder.map((sectionKey) => {
-        const Component = sectionComponents[sectionKey as keyof typeof sectionComponents];
-        return Component ? <React.Fragment key={sectionKey}>{Component()}</React.Fragment> : null;
-      })}
-    </div>
+    <>
+      <Head>
+        <title>{`${settings.config_sections?.seo?.meta_title || `${settings.company_name || 'Coachlinks'} — Digital Business Cards, Bio Links & Coaching Growth`}`}</title>
+        <meta
+          name="description"
+          content={
+            settings.config_sections?.seo?.meta_description ||
+            `${settings.company_name || 'Coachlinks'} helps coaches launch stunning digital business cards, bio links, lead magnets, and booking pages in minutes. Grow your coaching business with one branded link.`
+          }
+          head-key="description"
+        />
+        <meta
+          name="keywords"
+          content={
+            settings.config_sections?.seo?.meta_keywords ||
+            'coach digital business card, coach bio link, coach website builder, life coach card, fitness coach landing page, coaching lead magnets, booking link for coaches, online business card, link in bio for coaches, coach marketing tool'
+          }
+          head-key="keywords"
+        />
+        <meta
+          property="og:title"
+          content={settings.config_sections?.seo?.meta_title || `${settings.company_name || 'Coachlinks'} — Digital Business Cards for Coaches`}
+          head-key="og:title"
+        />
+        <meta
+          property="og:description"
+          content={
+            settings.config_sections?.seo?.meta_description ||
+            'Grow your coaching business with beautiful digital business cards, bio links, lead magnets and booking pages — all from one branded link.'
+          }
+          head-key="og:description"
+        />
+        <meta
+          name="twitter:title"
+          content={settings.config_sections?.seo?.meta_title || `${settings.company_name || 'Coachlinks'} — Digital Business Cards for Coaches`}
+          head-key="twitter:title"
+        />
+        <meta
+          name="twitter:description"
+          content={
+            settings.config_sections?.seo?.meta_description ||
+            'Grow your coaching business with beautiful digital business cards, bio links, lead magnets and booking pages — all from one branded link.'
+          }
+          head-key="twitter:description"
+        />
+      </Head>
+      <div 
+        className="min-h-screen bg-[#000000]" 
+        data-landing-page="true"
+        style={{ 
+          scrollBehavior: 'smooth', 
+          '--brand-color': primaryColor,
+          '--primary-color': settings.config_sections?.theme?.primary_color || primaryColor,
+          '--secondary-color': settings.config_sections?.theme?.secondary_color || '#8b5cf6',
+          '--accent-color': settings.config_sections?.theme?.accent_color || '#10b981'
+        } as React.CSSProperties}
+      >
+        {sectionOrder.map((sectionKey) => {
+          const Component = sectionComponents[sectionKey as keyof typeof sectionComponents];
+          return Component ? <React.Fragment key={sectionKey}>{Component()}</React.Fragment> : null;
+        })}
+      </div>
+    </>
   );
 }

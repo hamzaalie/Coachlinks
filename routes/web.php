@@ -68,6 +68,75 @@ use Inertia\Inertia;
 
 Route::get('/', [LandingPageController::class, 'show'])->name('home');
 
+// SEO: dynamic sitemap
+Route::get('/sitemap.xml', function () {
+    $urls = [
+        ['loc' => url('/'),           'changefreq' => 'daily',   'priority' => '1.0'],
+        ['loc' => url('/login'),      'changefreq' => 'monthly', 'priority' => '0.5'],
+        ['loc' => url('/register'),   'changefreq' => 'monthly', 'priority' => '0.6'],
+    ];
+
+    try {
+        if (\Illuminate\Support\Facades\Schema::hasTable('custom_pages')) {
+            $pages = \Illuminate\Support\Facades\DB::table('custom_pages')
+                ->select('slug', 'updated_at')
+                ->when(\Illuminate\Support\Facades\Schema::hasColumn('custom_pages', 'status'), function ($q) {
+                    $q->where('status', 1);
+                })
+                ->get();
+
+            foreach ($pages as $page) {
+                if (empty($page->slug)) {
+                    continue;
+                }
+                $urls[] = [
+                    'loc'        => url('/page/' . ltrim($page->slug, '/')),
+                    'lastmod'    => optional($page->updated_at)->toAtomString(),
+                    'changefreq' => 'monthly',
+                    'priority'   => '0.5',
+                ];
+            }
+        }
+    } catch (\Throwable $e) {
+        // Fail silently so sitemap still renders for anonymous crawlers.
+    }
+
+    $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    foreach ($urls as $entry) {
+        $xml .= "  <url>\n";
+        $xml .= "    <loc>" . htmlspecialchars($entry['loc'], ENT_XML1) . "</loc>\n";
+        if (!empty($entry['lastmod'])) {
+            $xml .= "    <lastmod>" . $entry['lastmod'] . "</lastmod>\n";
+        }
+        $xml .= "    <changefreq>" . $entry['changefreq'] . "</changefreq>\n";
+        $xml .= "    <priority>" . $entry['priority'] . "</priority>\n";
+        $xml .= "  </url>\n";
+    }
+    $xml .= '</urlset>';
+
+    return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+})->name('sitemap');
+
+// SEO: dynamic robots.txt that always references the correct host
+Route::get('/robots.txt', function () {
+    $lines = [
+        'User-agent: *',
+        'Allow: /',
+        'Disallow: /admin',
+        'Disallow: /dashboard',
+        'Disallow: /settings',
+        'Disallow: /install',
+        'Disallow: /update',
+        'Disallow: /api/',
+        'Disallow: /storage/',
+        '',
+        'Sitemap: ' . url('/sitemap.xml'),
+    ];
+
+    return response(implode("\n", $lines), 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+})->name('robots');
+
 // Custom installer route override
 Route::get('install/requirements', [\App\Http\Controllers\Installer\RequirementsController::class, 'requirements'])
     ->middleware(['web', 'install'])
