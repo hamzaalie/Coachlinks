@@ -40,16 +40,33 @@ export default function SiteLogo({
   const theme = settings?.config_sections?.theme;
   const preferredLogo = variant === 'dark' ? theme?.logo_dark : theme?.logo_light;
   const fallbackLogo = variant === 'dark' ? theme?.logo_light : theme?.logo_dark;
-  
-  // Use custom logos if available, otherwise use default PNGs
-  let logoSrc = getDisplayUrl(preferredLogo || fallbackLogo);
-  if (!logoSrc) {
-    logoSrc = getDisplayUrl(variant === 'dark' ? DEFAULT_LOGOS.dark : DEFAULT_LOGOS.light);
-  }
+
+  const defaultLogo = getDisplayUrl(variant === 'dark' ? DEFAULT_LOGOS.dark : DEFAULT_LOGOS.light);
+  const fallbackLogoSrc = getDisplayUrl(fallbackLogo);
+  const preferredLogoSrc = getDisplayUrl(preferredLogo);
+
+  // Prefer configured logos, but gracefully recover if a stored URL is stale/broken.
+  const [logoSrc, setLogoSrc] = React.useState(preferredLogoSrc || fallbackLogoSrc || defaultLogo);
+
+  React.useEffect(() => {
+    setLogoSrc(preferredLogoSrc || fallbackLogoSrc || defaultLogo);
+  }, [preferredLogoSrc, fallbackLogoSrc, defaultLogo]);
+
+  const handleImageError = React.useCallback(() => {
+    if (logoSrc === preferredLogoSrc && fallbackLogoSrc) {
+      setLogoSrc(fallbackLogoSrc);
+      return;
+    }
+
+    if (logoSrc !== defaultLogo) {
+      setLogoSrc(defaultLogo);
+    }
+  }, [logoSrc, preferredLogoSrc, fallbackLogoSrc, defaultLogo]);
 
   return (
     <img
       src={logoSrc}
+      onError={handleImageError}
       alt={settings?.company_name || 'Logo'}
       className={`${imageClassName} ${className}`.trim()}
     />
