@@ -11,6 +11,7 @@ use App\Observers\BusinessObserver;
 use App\Providers\AssetServiceProvider;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +32,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        // Railway sits behind a proxy; force canonical HTTPS URLs in production.
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+
+            $appUrl = rtrim((string) config('app.url'), '/');
+            if (!empty($appUrl)) {
+                URL::forceRootUrl($appUrl);
+            }
+        }
+
         // Register the UserObserver
         User::observe(UserObserver::class);
         
