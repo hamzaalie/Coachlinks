@@ -1063,7 +1063,8 @@ if (! function_exists('createDefaultSettings')) {
             ];
         }
         
-        Setting::insert($settingsData);
+        // Avoid duplicate key exceptions when defaults are initialized more than once.
+        Setting::insertOrIgnore($settingsData);
     }
 }
 
