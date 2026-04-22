@@ -131,8 +131,8 @@ class RegisteredUserController extends Controller
             return redirect()->route('verification.notice');
         }
 
-        // Redirect to template gallery to select a coach card template
-        return redirect()->route('vcard-builder.templates');
+        // Redirect to onboarding template selection (no explicit permission middleware).
+        return redirect()->route('onboarding.template-selection');
     }
     
     /**
