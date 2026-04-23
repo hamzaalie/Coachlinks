@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Permission;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 class PermissionService
 {
@@ -34,7 +35,11 @@ class PermissionService
             return false;
         }
 
-        return $user->hasPermissionTo($permission);
+        try {
+            return $user->hasPermissionTo($permission);
+        } catch (PermissionDoesNotExist $e) {
+            return false;
+        }
     }
 
     /**
