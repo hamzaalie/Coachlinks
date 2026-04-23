@@ -319,7 +319,7 @@ class PlanController extends Controller
         }
         
         // Filter plans based on billing cycle and duration
-        $dbPlans = Plan::where('is_plan_enable', 'on')
+        $dbPlans = Plan::whereIn('is_plan_enable', ['on', '1', 1, true])
             ->where(function($query) use ($billingCycle) {
                 $query->where('duration', $billingCycle)
                       ->orWhere('duration', 'both');

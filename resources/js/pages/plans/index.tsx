@@ -699,6 +699,11 @@ export default function Plans({ plans: initialPlans, billingCycle: initialBillin
         </div>
         
         {/* Plans grid */}
+        {plans.length === 0 && !isAdmin ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">
+            {t("No active plans are available right now. Please contact the administrator.")}
+          </div>
+        ) : null}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {plans.map((plan) => (
             <div 
