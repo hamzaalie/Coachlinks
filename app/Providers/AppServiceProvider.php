@@ -37,9 +37,13 @@ class AppServiceProvider extends ServiceProvider
         if (app()->environment('production')) {
             URL::forceScheme('https');
 
-            $appUrl = rtrim((string) config('app.url'), '/');
-            if (!empty($appUrl)) {
-                URL::forceRootUrl($appUrl);
+            // Do not force a single root host during web requests.
+            // This avoids CSRF/session breakage when the public domain changes.
+            if (app()->runningInConsole()) {
+                $appUrl = rtrim((string) config('app.url'), '/');
+                if (!empty($appUrl)) {
+                    URL::forceRootUrl($appUrl);
+                }
             }
         }
 
